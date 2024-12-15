@@ -13,13 +13,19 @@ class Lexer:
     def __init__(self, text):
         self.text = text
         self.pos = 0
+        self.line = 1
+        self.column = 1
         self.current_char = self.text[0] if text else None
 
     def error(self):
-        raise Exception(f'Invalid character: {self.current_char}')
+        raise Exception(f'Invalid character "{self.current_char}" at line {self.line}, column {self.column}')
 
     def advance(self):
+        if self.current_char == '\n':
+            self.line += 1
+            self.column = 0
         self.pos += 1
+        self.column += 1
         if self.pos > len(self.text) - 1:
             self.current_char = None
         else:
@@ -27,7 +33,13 @@ class Lexer:
 
     def skip_whitespace(self):
         while self.current_char and self.current_char.isspace():
+            if self.current_char == '\n':
+                self.line += 1
+                self.column = 1
+                self.advance()
+                return Token('NEWLINE', '\n')
             self.advance()
+        return None
 
     def get_number(self):
         result = ''
@@ -59,7 +71,10 @@ class Lexer:
         while self.current_char:
             
             if self.current_char.isspace():
-                self.skip_whitespace()
+                newline_token = self.skip_whitespace()
+                if newline_token:
+                    tokens.append(newline_token)
+                    operator_count = 0  # Reset operator count on new line
                 continue
 
             if self.current_char.isdigit():
@@ -71,7 +86,7 @@ class Lexer:
                 if identifier in ['plus', 'minus', 'times', 'divide']:
                     operator_count += 1
                     if operator_count > 1:
-                        raise Exception('Only one operator allowed per line')
+                        raise Exception(f'Syntax Error: Only one operator allowed per line (line {self.line}, column {self.column})')
                     
                     if identifier == 'plus':
                         tokens.append(Token('OPERATOR', "+"))
@@ -81,6 +96,18 @@ class Lexer:
                         tokens.append(Token('OPERATOR', "*"))
                     elif identifier == 'divide':
                         tokens.append(Token('OPERATOR', "/"))
+                elif identifier == 'is':
+                    self.skip_whitespace()
+                    start_pos = self.pos
+                    next_identifier = self.get_identifier()
+                    if next_identifier == 'now':
+                        tokens.append(Token('ASSIGN', '='))
+                    else:
+                        self.pos = start_pos
+                        self.current_char = self.text[self.pos]
+                        raise Exception(f'Syntax Error: Expected "now" after "is" at line {self.line}, column {self.column}')
+                else:
+                    tokens.append(Token('IDENTIFIER', identifier))
                 continue
 
             self.error()
@@ -88,14 +115,14 @@ class Lexer:
         return tokens
 
 test_inputs = [
-    "9 plus 2.798"
+    "x is now 2.798\ny is now 3\nx plus y",
 ]
 
-# for input_text in test_inputs:
-#     print(f"\nInput: {input_text}")
-#     lexer = Lexer(input_text)
-#     try:
-#         tokens = lexer.tokenize()
-#         print("Tokens:", tokens)
-#     except Exception as e:
-#         print("Error:", str(e))
+for input_text in test_inputs:
+    print(f"\nInput: {input_text}")
+    lexer = Lexer(input_text)
+    try:
+        tokens = lexer.tokenize()
+        print("Tokens:", tokens)
+    except Exception as e:
+        print("Error:", str(e))
