@@ -6,18 +6,19 @@ def run_program(source_code):
     # Create lexer instance
     lexer = Lexer(source_code)
     tokens = lexer.tokenize()
-    return tokens
+    # return tokens
     
-    # # Create parser instance
-    # parser = Parser(tokens)
-    # ast = parser.parse()
+    # Create parser instance
+    parser = Parser(tokens)
+    ast = parser.parse()
+    # return ast
     
-    # # Create interpreter instance
-    # interpreter = Interpreter(ast)
-    # result = interpreter.interpret()
-    # return result
+    # Create interpreter instance
+    interpreter = Interpreter(ast)
+    result = interpreter.interpret()
+    return result
 
 if __name__ == "__main__":
-    source = "2 + 9"
+    source = "3 plus 2"
     result = run_program(source)
     print(result)
