@@ -48,6 +48,16 @@ class Number(AST):
     def __repr__(self):
         return self.__str__()
 
+class Variable(AST):
+    def __init__(self, name):
+        self.name = name
+    
+    def __str__(self):
+        return f"Variable({self.name})"
+    
+    def __repr__(self):
+        return self.__str__()
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -94,9 +104,11 @@ class Parser:
                 if self.current_token and self.current_token.type != 'NEWLINE':
                     self.error()
             elif self.current_token.type == 'ASSIGN':
+                if not isinstance(left, Variable):
+                    raise Exception("Can only assign to variables")
                 self.advance()
                 right = self.term()
-                left = Assign(left.value, right)
+                left = Assign(left.name, right)
             
                 # Allow newline or None after assignment
                 if self.current_token and self.current_token.type != 'NEWLINE':
@@ -115,13 +127,13 @@ class Parser:
         elif self.current_token.type == 'IDENTIFIER':
             token = self.current_token
             self.advance()
-            return Number(token.value)
+            return Variable(token.value)
         else:
             self.error()
 
 if __name__ == '__main__':
     test_inputs = [
-        "x is now 3\ny is now 4\nx plus y",
+        "y is now 7\nx is now y",
     ]
     
     for text in test_inputs:

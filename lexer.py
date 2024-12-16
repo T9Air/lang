@@ -114,15 +114,15 @@ class Lexer:
 
         return tokens
 
-test_inputs = [
-    "x is now 2.798\ny is now 3\nx plus y",
-]
+# test_inputs = [
+#     "x is now 2 plus 3",
+# ]
 
-for input_text in test_inputs:
-    print(f"\nInput: {input_text}")
-    lexer = Lexer(input_text)
-    try:
-        tokens = lexer.tokenize()
-        print("Tokens:", tokens)
-    except Exception as e:
-        print("Error:", str(e))
+# for input_text in test_inputs:
+#     print(f"\nInput: {input_text}")
+#     lexer = Lexer(input_text)
+#     try:
+#         tokens = lexer.tokenize()
+#         print("Tokens:", tokens)
+#     except Exception as e:
+#         print("Error:", str(e))

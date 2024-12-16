@@ -16,11 +16,7 @@ class Interpreter:
     
     def visit_BinOp(self, node):
         left = self.visit(node.left)
-        if left.isalpha():
-            left = self.variables[left]
         right = self.visit(node.right)
-        if right.isalpha():
-            right = self.variables[right]
         
         try:
             if node.op == '+':

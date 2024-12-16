@@ -19,6 +19,6 @@ def run_program(source_code):
     return result
 
 if __name__ == "__main__":
-    source = "x is now 2.798\ny is now 3\nx plus y"
+    source = "y is now 10\nx is now y\nx plus 5"
     result = run_program(source)
     print(f"Final result: {result}")
