@@ -24,6 +24,16 @@ class BinOp(AST):
     
     def __repr__(self):
         return self.__str__()
+    
+class Print(AST):
+    def __init__(self, value):
+        self.value = value
+    
+    def __str__(self):
+        return f"PrintOP:\n  value: {self.value}"
+    
+    def __repr__(self):
+        return self.__str__()
 
 class Assign(AST):
     def __init__(self, name, value):
@@ -113,6 +123,14 @@ class Parser:
                 # Allow newline or None after assignment
                 if self.current_token and self.current_token.type != 'NEWLINE':
                     self.error()
+            elif self.current_token.type == 'OUTPUT':
+                self.advance()
+                right = self.term()
+                left = Print(right)
+            
+                # Allow newline or None after output
+                if self.current_token and self.current_token.type != 'NEWLINE':
+                    self.error()
         
         return left
     
@@ -128,12 +146,16 @@ class Parser:
             token = self.current_token
             self.advance()
             return Variable(token.value)
+        elif self.current_token.type == 'OUTPUT':
+            token = self.current_token
+            self.advance()
+            return Print(token.value)
         else:
             self.error()
 
 if __name__ == '__main__':
     test_inputs = [
-        "y is now 7\nx is now y",
+        "output \"Hello, World!\""
     ]
     
     for text in test_inputs:

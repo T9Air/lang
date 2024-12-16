@@ -43,6 +43,13 @@ class Interpreter:
     def visit_Assign(self, node):
         self.variables[node.name] = self.visit(node.value)
         return self.variables[node.name]
+    
+    def visit_Print(self, node):
+        value = self.visit(node.value)
+        print(value)
+        
+    def visit_str(self, node):
+        return node
 
     def visit_Statement(self, node):
         result = None

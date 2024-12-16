@@ -59,7 +59,7 @@ class Lexer:
 
     def get_identifier(self):
         result = ''
-        while self.current_char and (self.current_char.isalnum() or self.current_char == '_'):
+        while self.current_char and (self.current_char.isalnum() or self.current_char == '_' or self.current_char == '\"'):
             result += self.current_char
             self.advance()
         return result
@@ -96,6 +96,22 @@ class Lexer:
                         tokens.append(Token('OPERATOR', "*"))
                     elif identifier == 'divide':
                         tokens.append(Token('OPERATOR', "/"))
+                elif identifier == 'output':
+                    self.skip_whitespace()
+                    start_pos = self.pos
+                    output_string = ''
+                    if self.current_char == '\"':
+                        self.advance() 
+                        while self.current_char != '\"':
+                            if self.current_char == ' ':
+                                output_string += ' '
+                                self.advance()
+                            else:
+                                output_string += self.current_char
+                                self.advance()
+                        self.advance()
+                    tokens.append(Token('OUTPUT', output_string))
+                    
                 elif identifier == 'is':
                     self.skip_whitespace()
                     start_pos = self.pos
@@ -114,15 +130,15 @@ class Lexer:
 
         return tokens
 
-# test_inputs = [
-#     "x is now 2 plus 3",
-# ]
+test_inputs = [
+    # 'output "Hello, world!"',
+]
 
-# for input_text in test_inputs:
-#     print(f"\nInput: {input_text}")
-#     lexer = Lexer(input_text)
-#     try:
-#         tokens = lexer.tokenize()
-#         print("Tokens:", tokens)
-#     except Exception as e:
-#         print("Error:", str(e))
+for input_text in test_inputs:
+    print(f"\nInput: {input_text}")
+    lexer = Lexer(input_text)
+    try:
+        tokens = lexer.tokenize()
+        print("Tokens:", tokens)
+    except Exception as e:
+        print("Error:", str(e))
