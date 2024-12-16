@@ -28,6 +28,8 @@ class BinOp(AST):
 class Assign(AST):
     def __init__(self, name, value):
         self.name = name
+        if name.isdecimal():
+            raise Exception(f"Syntax Error: Invalid variable name '{name}'. Variable names must start with a letter.")
         self.value = value
     
     def __str__(self):
