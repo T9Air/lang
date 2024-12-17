@@ -124,9 +124,18 @@ class Parser:
         left = self.term()
         
         if isinstance(left, Keyword) and left.value == 'print':
-            if self.current_token and self.current_token.type == 'STRING' or self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
-                right = self.term()
-                left = Print(right)
+            if self.current_token: 
+                if self.current_token.type == 'STRING':
+                    right = self.term()
+                    left = Print(right)
+                elif self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
+                    right = self.term()
+                    if self.current_token.type == 'OPERATOR':
+                        op = self.current_token.value
+                        self.advance()
+                        next_num = self.term()
+                        right = BinOp(right, op, next_num)
+                    left = Print(right)
             else:
                 self.error()
         
