@@ -25,12 +25,12 @@ class BinOp(AST):
     def __repr__(self):
         return self.__str__()
     
-class Print(AST):
+class Keyword(AST):
     def __init__(self, value):
         self.value = value
     
     def __str__(self):
-        return f"PrintOP:\n  value: {self.value}"
+        return f"KeywordOP:\n  value: {self.value}"
     
     def __repr__(self):
         return self.__str__()
@@ -57,6 +57,16 @@ class Number(AST):
     
     def __repr__(self):
         return self.__str__()
+    
+class String(AST):
+    def __init__(self, value):
+        self.value = value
+    
+    def __str__(self):
+        return f"String({self.value})"
+    
+    def __repr__(self):
+        return self.__str__()
 
 class Variable(AST):
     def __init__(self, name):
@@ -64,6 +74,16 @@ class Variable(AST):
     
     def __str__(self):
         return f"Variable({self.name})"
+    
+    def __repr__(self):
+        return self.__str__()
+
+class Print(AST):
+    def __init__(self, value):
+        self.value = value
+    
+    def __str__(self):
+        return f"PrintOP:\n  value: {self.value}"
     
     def __repr__(self):
         return self.__str__()
@@ -103,7 +123,14 @@ class Parser:
     def expr(self):
         left = self.term()
         
-        if self.current_token:
+        if isinstance(left, Keyword) and left.value == 'print':
+            if self.current_token and self.current_token.type == 'STRING':
+                right = self.term()
+                left = Print(right)
+            else:
+                self.error()
+        
+        elif self.current_token:
             if self.current_token.type == 'OPERATOR':
                 op = self.current_token.value
                 self.advance()
@@ -123,14 +150,18 @@ class Parser:
                 # Allow newline or None after assignment
                 if self.current_token and self.current_token.type != 'NEWLINE':
                     self.error()
-            elif self.current_token.type == 'OUTPUT':
-                self.advance()
-                right = self.term()
-                left = Print(right)
+            elif self.current_token.type == 'KEYWORD':
+                op = self.current_token.value
+                if op == 'print':
+                    self.advance()
+                    right = self.term()
+                    left = Print(right)
             
                 # Allow newline or None after output
                 if self.current_token and self.current_token.type != 'NEWLINE':
                     self.error()
+            elif self.current_token.type == 'STRING':
+                self.error()
         
         return left
     
@@ -146,10 +177,14 @@ class Parser:
             token = self.current_token
             self.advance()
             return Variable(token.value)
-        elif self.current_token.type == 'OUTPUT':
+        elif self.current_token.type == 'KEYWORD':
             token = self.current_token
             self.advance()
-            return Print(token.value)
+            return Keyword(token.value)
+        elif self.current_token.type == 'STRING':
+            token = self.current_token
+            self.advance()
+            return String(token.value)
         else:
             self.error()
 

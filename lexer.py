@@ -97,6 +97,7 @@ class Lexer:
                     elif identifier == 'divide':
                         tokens.append(Token('OPERATOR', "/"))
                 elif identifier == 'output':
+                    tokens.append(Token('KEYWORD', 'print'))
                     self.skip_whitespace()
                     start_pos = self.pos
                     output_string = ''
@@ -110,7 +111,7 @@ class Lexer:
                                 output_string += self.current_char
                                 self.advance()
                         self.advance()
-                    tokens.append(Token('OUTPUT', output_string))
+                    tokens.append(Token('STRING', output_string))
                     
                 elif identifier == 'is':
                     self.skip_whitespace()

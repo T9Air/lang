@@ -19,6 +19,5 @@ def run_program(source_code):
     return result
 
 if __name__ == "__main__":
-    source = "output \"Hello, World!\""
+    source = 'output "Hello, World!"'
     result = run_program(source)
-    print(f"Final result: {result}")

@@ -50,6 +50,9 @@ class Interpreter:
         
     def visit_str(self, node):
         return node
+    
+    def visit_String(self, node):
+        return node.value
 
     def visit_Statement(self, node):
         result = None
