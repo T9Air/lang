@@ -145,6 +145,13 @@ class Parser:
                     raise Exception("Can only assign to variables")
                 self.advance()
                 right = self.term()
+                if self.current_token and self.current_token.type == 'OPERATOR':
+                    op = self.current_token.value
+                    self.advance()
+                    next_num = self.term()
+                    right = BinOp(right, op, next_num)
+                else:
+                    self.pos -= 1
                 left = Assign(left.name, right)
             
                 # Allow newline or None after assignment
