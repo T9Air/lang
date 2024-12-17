@@ -130,7 +130,8 @@ class Parser:
                     left = Print(right)
                 elif self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
                     right = self.term()
-                    if self.current_token.type == 'OPERATOR':
+                    # Add check for None before accessing type
+                    if self.current_token and self.current_token.type == 'OPERATOR':
                         op = self.current_token.value
                         self.advance()
                         next_num = self.term()
@@ -159,8 +160,7 @@ class Parser:
                     self.advance()
                     next_num = self.term()
                     right = BinOp(right, op, next_num)
-                else:
-                    self.pos -= 1
+                
                 left = Assign(left.name, right)
             
                 # Allow newline or None after assignment
@@ -194,7 +194,8 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        "output \"Hello, World!\""
+        "output \"Hello, World!\"",
+        "x is now 5\noutput x",
     ]
     
     for text in test_inputs:
