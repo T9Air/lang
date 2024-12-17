@@ -19,5 +19,5 @@ def run_program(source_code):
     return result
 
 if __name__ == "__main__":
-    source = 'output "Hello, World!"'
+    source = 'x is now 9'
     result = run_program(source)

@@ -124,7 +124,7 @@ class Parser:
         left = self.term()
         
         if isinstance(left, Keyword) and left.value == 'print':
-            if self.current_token and self.current_token.type == 'STRING':
+            if self.current_token and self.current_token.type == 'STRING' or self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
                 right = self.term()
                 left = Print(right)
             else:
@@ -150,18 +150,6 @@ class Parser:
                 # Allow newline or None after assignment
                 if self.current_token and self.current_token.type != 'NEWLINE':
                     self.error()
-            elif self.current_token.type == 'KEYWORD':
-                op = self.current_token.value
-                if op == 'print':
-                    self.advance()
-                    right = self.term()
-                    left = Print(right)
-            
-                # Allow newline or None after output
-                if self.current_token and self.current_token.type != 'NEWLINE':
-                    self.error()
-            elif self.current_token.type == 'STRING':
-                self.error()
         
         return left
     

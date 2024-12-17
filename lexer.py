@@ -100,18 +100,22 @@ class Lexer:
                     tokens.append(Token('KEYWORD', 'print'))
                     self.skip_whitespace()
                     start_pos = self.pos
-                    output_string = ''
                     if self.current_char == '\"':
+                        output = ''
                         self.advance() 
                         while self.current_char != '\"':
                             if self.current_char == ' ':
-                                output_string += ' '
+                                output += ' '
                                 self.advance()
                             else:
-                                output_string += self.current_char
+                                output += self.current_char
                                 self.advance()
                         self.advance()
-                    tokens.append(Token('STRING', output_string))
+                        tokens.append(Token('STRING', output))
+                    elif self.current_char.isdigit():
+                        output = self.get_number()
+                        tokens.append(Token('NUMBER', output))
+                        
                     
                 elif identifier == 'is':
                     self.skip_whitespace()
