@@ -87,6 +87,29 @@ class Print(AST):
     
     def __repr__(self):
         return self.__str__()
+    
+class If(AST):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+    
+    def __str__(self):
+        return f"IfOP:\n  left: {self.left}\n  op: {self.op}\n  right: {self.right}"
+    
+    def __repr__(self):
+        return self.__str__()
+
+class IfBlock(AST):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+    
+    def __str__(self):
+        return f"IfBlock:\n  condition: {self.condition}\n  body: {self.body}"
+    
+    def __repr__(self):
+        return self.__str__()
 
 class Parser:
     def __init__(self, tokens):
@@ -105,6 +128,42 @@ class Parser:
             self.current_token = None
         else:
             self.current_token = self.tokens[self.pos]
+            
+    def parse_if(self):
+        # Get left side of condition
+        left = self.term()
+        
+        # Get comparison operator
+        if self.current_token and self.current_token.type == 'COMPARISON':
+            op = self.current_token.value
+            self.advance()
+            right = self.term()
+            condition = If(left, op, right)
+        else:
+            self.error()
+        
+        if self.current_token and self.current_token.type == 'NEWLINE':
+            self.advance()
+        else:
+            self.error()
+            
+        if self.current_token and self.current_token.type == 'INDENT':
+            self.advance()
+        else:
+            self.error()
+        
+        body = []
+        while self.current_token:
+            if self.current_token.type == 'NEWLINE':
+                self.advance()
+                if self.current_token.type != 'INDENT':
+                    break
+                continue
+            line = self.expr()
+            if line:
+                body.append(line)
+        print("Body:", body)
+        return IfBlock(condition, Statement(body))
     
     def parse(self):
         statements = []
@@ -123,23 +182,26 @@ class Parser:
     def expr(self):
         left = self.term()
         
-        if isinstance(left, Keyword) and left.value == 'print':
-            if self.current_token: 
-                if self.current_token.type == 'STRING':
-                    right = self.term()
-                    left = Print(right)
-                elif self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
-                    right = self.term()
-                    # Add check for None before accessing type
-                    if self.current_token and self.current_token.type == 'OPERATOR':
-                        op = self.current_token.value
-                        self.advance()
-                        next_num = self.term()
-                        right = BinOp(right, op, next_num)
-                    left = Print(right)
-            else:
-                self.error()
-        
+        if isinstance(left, Keyword):
+            if left.value == 'print':
+                if self.current_token: 
+                    if self.current_token.type == 'STRING':
+                        right = self.term()
+                        left = Print(right)
+                    elif self.current_token.type == 'NUMBER' or self.current_token.type == 'IDENTIFIER':
+                        right = self.term()
+                        # Add check for None before accessing type
+                        if self.current_token and self.current_token.type == 'OPERATOR':
+                            op = self.current_token.value
+                            self.advance()
+                            next_num = self.term()
+                            right = BinOp(right, op, next_num)
+                        left = Print(right)
+                else:
+                    self.error()
+            elif left.value == 'if':
+                left = self.parse_if()
+                
         elif self.current_token:
             if self.current_token.type == 'OPERATOR':
                 op = self.current_token.value
@@ -194,8 +256,7 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        "output \"Hello, World!\"",
-        "x is now 5\noutput x",
+        "if x equals 5\n    x is now 5\noutput x",
     ]
     
     for text in test_inputs:

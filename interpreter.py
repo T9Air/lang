@@ -32,6 +32,18 @@ class Interpreter:
         except TypeError:
             raise Exception(f'Runtime Error: Invalid operation {left} {node.op} {right}')
     
+    def visit_If(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        
+        if node.op == '==':
+            return left == right
+    
+    def visit_IfBlock(self, node):
+        condition = self.visit(node.condition)
+        if condition:
+            return self.visit(node.body)
+    
     def visit_Number(self, node):
         return node.value
     

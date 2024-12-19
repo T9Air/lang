@@ -13,9 +13,10 @@ class Lexer:
     def __init__(self, text):
         self.text = text
         self.pos = 0
+        self.current_char = self.text[0] if text else None
         self.line = 1
         self.column = 1
-        self.current_char = self.text[0] if text else None
+        self.indent_level = 0
 
     def error(self):
         raise Exception(f'Invalid character "{self.current_char}" at line {self.line}, column {self.column}')
@@ -70,6 +71,16 @@ class Lexer:
 
         while self.current_char:
             
+            if self.current_char.isspace() and self.current_char != '\n':
+                spaces = 0
+                while self.current_char and self.current_char.isspace():
+                    spaces += 1
+                    self.advance()
+                if self.column == spaces + 1:
+                    self.indent_level = spaces // 4
+                    if self.indent_level.is_integer() and self.indent_level > 0:
+                        tokens.append(Token('INDENT', self.indent_level))
+
             if self.current_char.isspace():
                 newline_token = self.skip_whitespace()
                 if newline_token:
@@ -115,8 +126,6 @@ class Lexer:
                     elif self.current_char.isdigit():
                         output = self.get_number()
                         tokens.append(Token('NUMBER', output))
-                        
-                    
                 elif identifier == 'is':
                     self.skip_whitespace()
                     start_pos = self.pos
@@ -127,6 +136,40 @@ class Lexer:
                         self.pos = start_pos
                         self.current_char = self.text[self.pos]
                         raise Exception(f'Syntax Error: Expected "now" after "is" at line {self.line}, column {self.column}')
+                elif identifier == 'if':
+                    tokens.append(Token('KEYWORD', 'if'))
+                    self.skip_whitespace()
+                    start_pos = self.pos
+                    if self.current_char.isdigit():
+                        number = self.get_number()
+                        tokens.append(Token('NUMBER', number))
+                    elif self.current_char.isalpha():
+                        identifier = self.get_identifier()
+                        tokens.append(Token('IDENTIFIER', identifier))
+                    else:
+                        self.pos = start_pos
+                        self.current_char = self.text[self.pos]
+                        raise Exception(f'Syntax Error: Expected number or identifier after "if" at line {self.line}, column {self.column}')
+                    self.skip_whitespace()
+                    identifier = self.get_identifier()
+                    if identifier == 'equals':
+                        tokens.append(Token('COMPARISON', '=='))
+                    else:
+                        self.pos = start_pos
+                        self.current_char = self.text[self.pos]
+                        raise Exception(f'Syntax Error: Expected operator after number or identifier at line {self.line}, column {self.column}')
+                    self.skip_whitespace()
+                    if self.current_char.isdigit():
+                        number = self.get_number()
+                        tokens.append(Token('NUMBER', number))
+                    elif self.current_char.isalpha():
+                        identifier = self.get_identifier()
+                        tokens.append(Token('IDENTIFIER', identifier))
+                    else:
+                        self.pos = start_pos
+                        self.current_char = self.text[self.pos]
+                        raise Exception(f'Syntax Error: Expected number or identifier after operator at line {self.line}, column {self.column}')
+                    
                 else:
                     tokens.append(Token('IDENTIFIER', identifier))
                 continue
@@ -136,7 +179,7 @@ class Lexer:
         return tokens
 
 test_inputs = [
-    # 'output "Hello, world!"',
+    # 'if x equals 5\n    x is now 5',
 ]
 
 for input_text in test_inputs:
