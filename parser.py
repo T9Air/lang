@@ -1,14 +1,18 @@
 from lexer import Token, Lexer
 
 class AST:
-    pass
+    def __str__(self, indent=0):
+        return '  ' * indent + self.__class__.__name__
 
 class Statement(AST):
     def __init__(self, statements):
         self.statements = statements
     
-    def __str__(self):
-        return "\n".join(str(stmt) for stmt in self.statements)
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'Statements:\n'
+        for stmt in self.statements:
+            result += stmt.__str__(indent + 1) + '\n'
+        return result.rstrip()
     
     def __repr__(self):
         return self.__str__()
@@ -19,8 +23,12 @@ class BinOp(AST):
         self.op = op
         self.right = right
     
-    def __str__(self):
-        return f"BinOp:\n  left: {self.left}\n  op: {self.op}\n  right: {self.right}"
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'BinOp:\n'
+        result += self.left.__str__(indent + 1) + '\n'
+        result += '  ' * (indent + 1) + f"Operator: '{self.op}'\n"
+        result += self.right.__str__(indent + 1)
+        return result
     
     def __repr__(self):
         return self.__str__()
@@ -29,8 +37,8 @@ class Keyword(AST):
     def __init__(self, value):
         self.value = value
     
-    def __str__(self):
-        return f"KeywordOP:\n  value: {self.value}"
+    def __str__(self, indent=0):
+        return '  ' * indent + f"KeywordOP:\n  value: {self.value}"
     
     def __repr__(self):
         return self.__str__()
@@ -42,8 +50,11 @@ class Assign(AST):
             raise Exception(f"Syntax Error: Invalid variable name '{name}'. Variable names must start with a letter.")
         self.value = value
     
-    def __str__(self):
-        return f"AssignOP:\n  name: {self.name}\n  value: {self.value}"
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'Assign:\n'
+        result += '  ' * (indent + 1) + f"Name: {self.name}\n"
+        result += self.value.__str__(indent + 1)
+        return result
     
     def __repr__(self):
         return self.__str__()
@@ -52,8 +63,8 @@ class Number(AST):
     def __init__(self, value):
         self.value = value
     
-    def __str__(self):
-        return f"Number({self.value})"
+    def __str__(self, indent=0):
+        return '  ' * indent + f'Number({self.value})'
     
     def __repr__(self):
         return self.__str__()
@@ -62,8 +73,8 @@ class String(AST):
     def __init__(self, value):
         self.value = value
     
-    def __str__(self):
-        return f"String({self.value})"
+    def __str__(self, indent=0):
+        return '  ' * indent + f'String("{self.value}")'
     
     def __repr__(self):
         return self.__str__()
@@ -72,8 +83,8 @@ class Variable(AST):
     def __init__(self, name):
         self.name = name
     
-    def __str__(self):
-        return f"Variable({self.name})"
+    def __str__(self, indent=0):
+        return '  ' * indent + f'Variable({self.name})'
     
     def __repr__(self):
         return self.__str__()
@@ -82,8 +93,10 @@ class Print(AST):
     def __init__(self, value):
         self.value = value
     
-    def __str__(self):
-        return f"PrintOP:\n  value: {self.value}"
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'Print:\n'
+        result += self.value.__str__(indent + 1)
+        return result
     
     def __repr__(self):
         return self.__str__()
@@ -94,8 +107,12 @@ class If(AST):
         self.op = op
         self.right = right
     
-    def __str__(self):
-        return f"IfOP:\n  left: {self.left}\n  op: {self.op}\n  right: {self.right}"
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'If:\n'
+        result += self.left.__str__(indent + 1) + '\n'
+        result += '  ' * (indent + 1) + f"Comparison: '{self.op}'\n"
+        result += self.right.__str__(indent + 1)
+        return result
     
     def __repr__(self):
         return self.__str__()
@@ -105,8 +122,11 @@ class IfBlock(AST):
         self.condition = condition
         self.body = body
     
-    def __str__(self):
-        return f"IfBlock:\n  condition: {self.condition}\n  body: {self.body}"
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'IfBlock:\n'
+        result += self.condition.__str__(indent + 1) + '\n'
+        result += self.body.__str__(indent + 1)
+        return result
     
     def __repr__(self):
         return self.__str__()
@@ -162,7 +182,7 @@ class Parser:
             line = self.expr()
             if line:
                 body.append(line)
-        print("Body:", body)
+
         return IfBlock(condition, Statement(body))
     
     def parse(self):
