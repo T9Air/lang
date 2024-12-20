@@ -9,7 +9,7 @@ enlang is a coding language that is based on Python. It provides a simple and re
 To install enlang, clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/enlang.git
+git clone https://github.com/T9Air/enlang.git
 ```
 
 ## Getting Started
