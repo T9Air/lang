@@ -20,4 +20,4 @@ To run an enlang program:
 python main.py your_program.enl
 ```
 
-For examples and syntax details, please refer to [examples.md](examples.md) and [syntax.md](syntax.md).
+For syntax details, please refer to [syntax.md](syntax.md).
