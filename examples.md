@@ -5,6 +5,8 @@
 
 ```enlang
 x is now 5
+name is now "T9Air"
+value is now input
 ```
 
 ## Arithmetic Operations

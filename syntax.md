@@ -51,3 +51,9 @@ Example:
 ```enlang
 output "Hello, World!"
 ```
+
+## Using inputs to assign to a variable
+
+```enlang
+<variable_name> is now input
+```
