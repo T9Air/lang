@@ -156,10 +156,33 @@ class Lexer:
                     identifier = self.get_identifier()
                     if identifier == 'equals':
                         tokens.append(Token('COMPARISON', '=='))
+                    elif identifier == 'is':
+                        self.advance()
+                        identifier = self.get_identifier()
+                        if identifier == 'not':
+                            tokens.append(Token('COMPARISON', '!='))
+                        elif identifier == 'greater':
+                            self.advance()
+                            identifier = self.get_identifier()
+                            if identifier == 'than':
+                                tokens.append(Token('COMPARISON', '>'))
+                            else:
+                                self.pos = start_pos
+                                self.current_char = self.text[self.pos]
+                                raise Exception(f'Syntax Error: Expected "than" after "greater" at line {self.line}, column {self.column}')
+                        elif identifier == 'less':
+                            self.advance()
+                            identifier = self.get_identifier()
+                            if identifier == 'than':
+                                tokens.append(Token('COMPARISON', '<'))
+                            else:
+                                self.pos = start_pos
+                                self.current_char = self.text[self.pos]
+                                raise Exception(f'Syntax Error: Expected "than" after "less" at line {self.line}, column {self.column}')
                     else:
                         self.pos = start_pos
                         self.current_char = self.text[self.pos]
-                        raise Exception(f'Syntax Error: Expected operator after number or identifier at line {self.line}, column {self.column}')
+                        raise Exception(f'Syntax Error: Expected comparator after number or identifier at line {self.line}, column {self.column}')
                     self.skip_whitespace()
                     if self.current_char.isdigit():
                         number = self.get_number()

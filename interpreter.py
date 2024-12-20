@@ -38,6 +38,12 @@ class Interpreter:
         
         if node.op == '==':
             return left == right
+        elif node.op == '!=':
+            return left != right
+        elif node.op == '>':
+            return left > right
+        elif node.op == '<':
+            return left < right
     
     def visit_Else(self, node):
         return node.body
