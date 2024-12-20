@@ -39,10 +39,16 @@ class Interpreter:
         if node.op == '==':
             return left == right
     
+    def visit_Else(self, node):
+        return node.body
+    
     def visit_IfBlock(self, node):
         condition = self.visit(node.condition)
         if condition:
             return self.visit(node.body)
+        is_else = self.visit(node.else_body)
+        if is_else:
+            return self.visit(node.else_body)
     
     def visit_Number(self, node):
         return node.value

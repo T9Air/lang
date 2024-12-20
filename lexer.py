@@ -171,7 +171,8 @@ class Lexer:
                         self.pos = start_pos
                         self.current_char = self.text[self.pos]
                         raise Exception(f'Syntax Error: Expected number or identifier after operator at line {self.line}, column {self.column}')
-                    
+                elif identifier == 'otherwise':
+                    tokens.append(Token('KEYWORD', 'else'))
                 else:
                     tokens.append(Token('IDENTIFIER', identifier))
                 continue

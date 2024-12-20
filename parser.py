@@ -129,15 +129,30 @@ class If(AST):
     def __repr__(self):
         return self.__str__()
 
+class Else(AST):
+    def __init__(self, body):
+        self.body = body
+    
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'Else:\n'
+        result += self.body.__str__(indent + 1)
+        return result
+    
+    def __repr__(self):
+        return self.__str__()
+
 class IfBlock(AST):
-    def __init__(self, condition, body):
+    def __init__(self, condition, body, else_body=None):
         self.condition = condition
         self.body = body
+        self.else_body = else_body
     
     def __str__(self, indent=0):
         result = '  ' * indent + 'IfBlock:\n'
         result += self.condition.__str__(indent + 1) + '\n'
         result += self.body.__str__(indent + 1)
+        if self.else_body:
+            result += '\n' + self.else_body.__str__(indent + 1)
         return result
     
     def __repr__(self):
@@ -162,10 +177,8 @@ class Parser:
             self.current_token = self.tokens[self.pos]
             
     def parse_if(self):
-        # Get left side of condition
         left = self.term()
         
-        # Get comparison operator
         if self.current_token and self.current_token.type == 'COMPARISON':
             op = self.current_token.value
             self.advance()
@@ -178,24 +191,59 @@ class Parser:
             self.advance()
         else:
             self.error()
-            
+
         if self.current_token and self.current_token.type == 'INDENT':
+            indent_level = self.current_token.value
             self.advance()
         else:
             self.error()
-        
+
         body = []
         while self.current_token:
             if self.current_token.type == 'NEWLINE':
                 self.advance()
-                if self.current_token.type != 'INDENT':
+                if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value < indent_level:
+                    self.advance()
+                else:
                     break
-                continue
-            line = self.expr()
-            if line:
-                body.append(line)
+            else:
+                line = self.expr()
+                if line:
+                    body.append(line)
+                else:
+                    self.advance()
 
-        return IfBlock(condition, Statement(body))
+        if self.current_token and self.current_token.type == 'KEYWORD' and self.current_token.value == 'else':
+            self.advance()
+            if self.current_token and self.current_token.type == 'NEWLINE':
+                self.advance()
+            else:
+                self.error()
+
+            if self.current_token and self.current_token.type == 'INDENT':
+                else_indent_level = self.current_token.value
+                self.advance()
+            else:
+                self.error()
+
+            else_body = []
+            while self.current_token:
+                if self.current_token.type == 'NEWLINE':
+                    self.advance()
+                    if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value < else_indent_level:
+                        self.advance()
+                    else:
+                        break
+                else:
+                    line = self.expr()
+                    if line:
+                        else_body.append(line)
+                    else:
+                        self.advance()
+
+            return IfBlock(condition, Statement(body), Else(Statement(else_body)))
+        else:
+            return IfBlock(condition, Statement(body))
     
     def parse(self):
         statements = []
@@ -294,7 +342,7 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        "x is now input",
+        'x is now 5\nif x equals 5\n    output "x is 5"\notherwise\n    output "x is not 5"',
     ]
     
     for text in test_inputs:

@@ -38,6 +38,15 @@ if x equals 10
     output "x is 10"
 ```
 
+Use `else`if you want to do something when the condition is not true
+
+```enlang
+if x equals 10
+    output "x is 10"
+else
+    output "x is not 10"
+```
+
 ## Outputting Values
 
 Use `output` to print to the console:
