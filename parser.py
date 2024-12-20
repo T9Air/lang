@@ -101,6 +101,18 @@ class Print(AST):
     def __repr__(self):
         return self.__str__()
     
+class Input(AST):
+    def __init__(self, var_name):
+        self.var_name = var_name
+    
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'Input:\n'
+        result += '  ' * (indent + 1) + f"Variable: {self.var_name}"
+        return result
+    
+    def __repr__(self):
+        return self.__str__()
+    
 class If(AST):
     def __init__(self, left, op, right):
         self.left = left
@@ -237,11 +249,17 @@ class Parser:
                     raise Exception("Can only assign to variables")
                 self.advance()
                 right = self.term()
-                if self.current_token and self.current_token.type == 'OPERATOR':
-                    op = self.current_token.value
-                    self.advance()
-                    next_num = self.term()
-                    right = BinOp(right, op, next_num)
+                if isinstance(right, Keyword):
+                    if right.value == 'input':
+                        right = Input(left.name)
+                if self.current_token: 
+                    if self.current_token.type == 'OPERATOR':
+                        op = self.current_token.value
+                        self.advance()
+                        next_num = self.term()
+                        right = BinOp(right, op, next_num)
+                    elif self.current_token == 'input':
+                        right = Input(left.name)
                 
                 left = Assign(left.name, right)
             
@@ -276,7 +294,7 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        "if x equals 5\n    x is now 5\noutput x",
+        "x is now input",
     ]
     
     for text in test_inputs:

@@ -126,6 +126,8 @@ class Lexer:
                     elif self.current_char.isdigit():
                         output = self.get_number()
                         tokens.append(Token('NUMBER', output))
+                elif identifier == 'input':
+                    tokens.append(Token('KEYWORD', 'input'))
                 elif identifier == 'is':
                     self.skip_whitespace()
                     start_pos = self.pos
@@ -179,7 +181,7 @@ class Lexer:
         return tokens
 
 test_inputs = [
-    # 'if x equals 5\n    x is now 5',
+    # 'x is now input',
 ]
 
 for input_text in test_inputs:

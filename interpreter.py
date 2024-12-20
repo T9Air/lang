@@ -56,6 +56,13 @@ class Interpreter:
         self.variables[node.name] = self.visit(node.value)
         return self.variables[node.name]
     
+    def visit_Input(self, node):
+        input_value = input(f"Input value for {node.var_name}: ")
+        if input_value.isdigit():
+            return float(input_value)
+        else:
+            return input_value
+    
     def visit_Print(self, node):
         value = self.visit(node.value)
         print(value)
