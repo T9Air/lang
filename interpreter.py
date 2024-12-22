@@ -46,18 +46,16 @@ class Interpreter:
             return left < right
     
     def visit_Else(self, node):
-        return self.visit(node.body)
+        self.visit(node.body)
     
     def visit_IfBlock(self, node):
         condition = self.visit(node.condition)
         if condition:
-            return self.visit(node.body)
+            self.visit(node.body)
         else:
             if node.else_body:
-                return self.visit(node.else_body)
-            return None
-        
-
+                self.visit(node.else_body)
+          
     def visit_ForBlock(self, node):
         count = self.visit(node.count)
         for _ in range(int(count)):
@@ -73,7 +71,6 @@ class Interpreter:
     
     def visit_Assign(self, node):
         self.variables[node.name] = self.visit(node.value)
-        return self.variables[node.name]
     
     def visit_Input(self, node):
         input_value = input(f"Input value for {node.var_name}: ")
@@ -93,7 +90,5 @@ class Interpreter:
         return node.value
 
     def visit_Statement(self, node):
-        result = None
         for statement in node.statements:
-            result = self.visit(statement)
-        return result
+            self.visit(statement)
