@@ -65,6 +65,74 @@ class Lexer:
             self.advance()
         return result
 
+    def parse_condition(self):
+        tokens = []
+        start_pos = self.pos
+        
+        # Parse first operand
+        if self.current_char.isdigit():
+            number = self.get_number()
+            tokens.append(Token('NUMBER', number))
+        elif self.current_char.isalpha():
+            identifier = self.get_identifier()
+            tokens.append(Token('IDENTIFIER', identifier))
+        else:
+            self.pos = start_pos
+            self.current_char = self.text[self.pos]
+            raise Exception(f'Syntax Error: Expected number or identifier at line {self.line}, column {self.column}')
+        
+        self.skip_whitespace()
+        identifier = self.get_identifier()
+        
+        # Parse comparison operator
+        valid_comparisons = {
+            'equals': '==',
+            'is': None,  # Special case handled below
+            'less': None,  # Special case handled below
+            'greater': None,  # Special case handled below
+        }
+        
+        if identifier not in valid_comparisons:
+            self.pos = start_pos
+            self.current_char = self.text[self.pos]
+            raise Exception(f'Syntax Error: Invalid comparison operator "{identifier}" at line {self.line}, column {self.column}')
+            
+        if identifier == 'equals':
+            tokens.append(Token('COMPARISON', '=='))
+        elif identifier == 'is':
+            self.skip_whitespace()
+            next_word = self.get_identifier()
+            if next_word not in ['not', 'greater', 'less']:
+                self.pos = start_pos
+                self.current_char = self.text[self.pos]
+                raise Exception(f'Syntax Error: Expected "not", "greater", or "less" after "is" at line {self.line}, column {self.column}')
+                
+            if next_word == 'not':
+                tokens.append(Token('COMPARISON', '!='))
+            elif next_word in ['greater', 'less']:
+                self.skip_whitespace()
+                than_word = self.get_identifier()
+                if than_word != 'than':
+                    self.pos = start_pos
+                    self.current_char = self.text[self.pos]
+                    raise Exception(f'Syntax Error: Expected "than" after "{next_word}" at line {self.line}, column {self.column}')
+                tokens.append(Token('COMPARISON', '>' if next_word == 'greater' else '<'))
+        
+        # Parse second operand
+        self.skip_whitespace()
+        if self.current_char.isdigit():
+            number = self.get_number()
+            tokens.append(Token('NUMBER', number))
+        elif self.current_char.isalpha():
+            identifier = self.get_identifier()
+            tokens.append(Token('IDENTIFIER', identifier))
+        else:
+            self.pos = start_pos
+            self.current_char = self.text[self.pos]
+            raise Exception(f'Syntax Error: Expected number or identifier after operator at line {self.line}, column {self.column}')
+        
+        return tokens
+
     def tokenize(self):
         tokens = []
         operator_count = 0
@@ -210,16 +278,7 @@ class Lexer:
                         self.current_char = self.text[self.pos]
                         raise Exception(f'Syntax Error: Expected comparator after number or identifier at line {self.line}, column {self.column}')
                     self.skip_whitespace()
-                    if self.current_char.isdigit():
-                        number = self.get_number()
-                        tokens.append(Token('NUMBER', number))
-                    elif self.current_char.isalpha():
-                        identifier = self.get_identifier()
-                        tokens.append(Token('IDENTIFIER', identifier))
-                    else:
-                        self.pos = start_pos
-                        self.current_char = self.text[self.pos]
-                        raise Exception(f'Syntax Error: Expected number or identifier after operator at line {self.line}, column {self.column}')
+                    tokens.extend(self.parse_condition())
                 elif identifier == 'otherwise':
                     tokens.append(Token('KEYWORD', 'else'))
                 else:
