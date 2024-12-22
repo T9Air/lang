@@ -46,16 +46,17 @@ class Interpreter:
             return left < right
     
     def visit_Else(self, node):
-        return node.body
+        return self.visit(node.body)
     
     def visit_IfBlock(self, node):
         condition = self.visit(node.condition)
         if condition:
             return self.visit(node.body)
-        is_else = self.visit(node.else_body)
-        if is_else:
-            return self.visit(node.else_body)
-    
+        else:
+            if node.else_body:
+                return self.visit(node.else_body)
+            return None
+        
     def visit_Number(self, node):
         return node.value
     
