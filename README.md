@@ -2,7 +2,7 @@
 
 ## Introduction
 
-enlang is a coding language that is based on Python. It provides a simple and readable syntax aimed at making programming more accessible.
+enlang is a coding language that is based on Python. It provides a simple and readable syntax aimed at making programming more accessible for begginers.
 
 ## Installation
 
