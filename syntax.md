@@ -25,10 +25,12 @@ result is now a plus b
 
 The following conditions can be used in both `if` statements and `repeat until` loops:
 
-- `equals` - checks if two values are equal
-- `is not` - checks if two values are not equal
-- `is greater than` - checks if first value is greater than second value
-- `is less than` - checks if first value is less than second value
+- `=` - checks if two values are equal
+- `!=` - checks if two values are not equal
+- `>` - checks if first value is greater than second value
+- `<` - checks if first value is less than second value
+- `>=` or `=>` - check if the first value is greater than or equal to the second value
+- `<=` or `=<` - check if the first value is less than or equal to the second value
 
 ## Conditional Statements
 
@@ -42,14 +44,14 @@ if <condition>
 Example:
 
 ```enlang
-if x equals 10
+if x = 10
     output "x is 10"
 ```
 
 Use `else` if you want to do something when the condition is not true
 
 ```enlang
-if x equals 10
+if x = 10
     output "x is 10"
 else
     output "x is not 10"
@@ -105,10 +107,10 @@ repeat until <condition>
 Examples using different conditions:
 
 ```enlang
-repeat until count equals 10
+repeat until count = 10
     output count
     count is now count plus 1
 
-repeat until temperature is greater than 100
+repeat until temperature > 100
     temperature is now temperature plus 5
 ```

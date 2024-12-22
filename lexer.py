@@ -65,6 +65,41 @@ class Lexer:
             self.advance()
         return result
 
+    def get_comparison(self):
+        result = ''
+        if self.current_char == '=':
+            self.advance()
+            if self.current_char == ' ':
+                result = '='
+            elif self.current_char == '>':
+                result = '>='
+            elif self.current_char == '<':
+                result = '<='
+            else:
+                self.error()
+        elif self.current_char == '!':
+            self.advance()
+            if self.current_char == '=':
+                result = '!='
+            else:
+                self.error()
+        elif self.current_char == '>':
+            self.advance()
+            if self.current_char == '=':
+                result = '>='
+            else:
+                result = '>'
+        elif self.current_char == '<':
+            self.advance()
+            if self.current_char == '=':
+                result = '<='
+            else:
+                result = '<'
+        else:
+            self.error()
+            
+        return result
+
     def parse_condition(self):
         tokens = []
         start_pos = self.pos
@@ -82,41 +117,9 @@ class Lexer:
             raise Exception(f'Syntax Error: Expected number or identifier at line {self.line}, column {self.column}')
         
         self.skip_whitespace()
-        identifier = self.get_identifier()
+        comparison = self.get_comparison()
         
-        # Parse comparison operator
-        valid_comparisons = {
-            'equals': '==',
-            'is': None,  # Special case handled below
-            'less': None,  # Special case handled below
-            'greater': None,  # Special case handled below
-        }
-        
-        if identifier not in valid_comparisons:
-            self.pos = start_pos
-            self.current_char = self.text[self.pos]
-            raise Exception(f'Syntax Error: Invalid comparison operator "{identifier}" at line {self.line}, column {self.column}')
-            
-        if identifier == 'equals':
-            tokens.append(Token('COMPARISON', '=='))
-        elif identifier == 'is':
-            self.skip_whitespace()
-            next_word = self.get_identifier()
-            if next_word not in ['not', 'greater', 'less']:
-                self.pos = start_pos
-                self.current_char = self.text[self.pos]
-                raise Exception(f'Syntax Error: Expected "not", "greater", or "less" after "is" at line {self.line}, column {self.column}')
-                
-            if next_word == 'not':
-                tokens.append(Token('COMPARISON', '!='))
-            elif next_word in ['greater', 'less']:
-                self.skip_whitespace()
-                than_word = self.get_identifier()
-                if than_word != 'than':
-                    self.pos = start_pos
-                    self.current_char = self.text[self.pos]
-                    raise Exception(f'Syntax Error: Expected "than" after "{next_word}" at line {self.line}, column {self.column}')
-                tokens.append(Token('COMPARISON', '>' if next_word == 'greater' else '<'))
+        tokens.append(Token('COMPARISON', comparison))
         
         # Parse second operand
         self.skip_whitespace()
