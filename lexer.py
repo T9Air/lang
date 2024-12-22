@@ -210,73 +210,33 @@ class Lexer:
                     self.skip_whitespace()
                     start_pos = self.pos
                     if self.current_char.isdigit() or self.current_char.isalpha():
-                        tokens.append(Token('KEYWORD', 'repeat'))
                         if self.current_char.isdigit():
+                            tokens.append(Token('KEYWORD', 'repeat'))
                             number = self.get_number()
                             tokens.append(Token('NUMBER', number))
+                            self.skip_whitespace()
+                            identifier = self.get_identifier()
+                            if identifier != 'times':
+                                self.pos = start_pos
+                                self.current_char = self.text[self.pos]
+                                raise Exception(f'Syntax Error: Expected "times" after number at line {self.line}, column {self.column}')
                         elif self.current_char.isalpha():
                             identifier = self.get_identifier()
-                            if identifier != 'until':
-                                tokens.append(Token('IDENTIFIER', identifier))
+                            if identifier == 'until':
+                                tokens.append(Token('KEYWORD', 'until'))
+                                self.skip_whitespace()
+                                tokens.extend(self.parse_condition())
                             else:
-                                self.pos = start_pos
-                                self.current_char = self.text[self.pos]
-                                raise Exception(f'Syntax Error: Expected number after "repeat" at line {self.line}, column {self.column}')
-                        self.skip_whitespace()
-                        identifier = self.get_identifier()
-                        if identifier != 'times':
-                            self.pos = start_pos
-                            self.current_char = self.text[self.pos]
-                            raise Exception(f'Syntax Error: Expected "times" after number at line {self.line}, column {self.column}')
-                    else:
-                        self.pos = start_pos
-                        self.current_char = self.text[self.pos]
-                        raise Exception(f'Syntax Error: Expected number after "repeat" at line {self.line}, column {self.column}')
+                                tokens.append(Token('KEYWORD', 'repeat'))
+                                tokens.append(Token('IDENTIFIER', identifier))
+                                self.skip_whitespace()
+                                identifier = self.get_identifier()
+                                if identifier != 'times':
+                                    self.pos = start_pos
+                                    self.current_char = self.text[self.pos]
+                                    raise Exception(f'Syntax Error: Expected "times" after number at line {self.line}, column {self.column}')
                 elif identifier == 'if':
                     tokens.append(Token('KEYWORD', 'if'))
-                    self.skip_whitespace()
-                    start_pos = self.pos
-                    if self.current_char.isdigit():
-                        number = self.get_number()
-                        tokens.append(Token('NUMBER', number))
-                    elif self.current_char.isalpha():
-                        identifier = self.get_identifier()
-                        tokens.append(Token('IDENTIFIER', identifier))
-                    else:
-                        self.pos = start_pos
-                        self.current_char = self.text[self.pos]
-                        raise Exception(f'Syntax Error: Expected number or identifier after "if" at line {self.line}, column {self.column}')
-                    self.skip_whitespace()
-                    identifier = self.get_identifier()
-                    if identifier == 'equals':
-                        tokens.append(Token('COMPARISON', '=='))
-                    elif identifier == 'is':
-                        self.advance()
-                        identifier = self.get_identifier()
-                        if identifier == 'not':
-                            tokens.append(Token('COMPARISON', '!='))
-                        elif identifier == 'greater':
-                            self.advance()
-                            identifier = self.get_identifier()
-                            if identifier == 'than':
-                                tokens.append(Token('COMPARISON', '>'))
-                            else:
-                                self.pos = start_pos
-                                self.current_char = self.text[self.pos]
-                                raise Exception(f'Syntax Error: Expected "than" after "greater" at line {self.line}, column {self.column}')
-                        elif identifier == 'less':
-                            self.advance()
-                            identifier = self.get_identifier()
-                            if identifier == 'than':
-                                tokens.append(Token('COMPARISON', '<'))
-                            else:
-                                self.pos = start_pos
-                                self.current_char = self.text[self.pos]
-                                raise Exception(f'Syntax Error: Expected "than" after "less" at line {self.line}, column {self.column}')
-                    else:
-                        self.pos = start_pos
-                        self.current_char = self.text[self.pos]
-                        raise Exception(f'Syntax Error: Expected comparator after number or identifier at line {self.line}, column {self.column}')
                     self.skip_whitespace()
                     tokens.extend(self.parse_condition())
                 elif identifier == 'otherwise':

@@ -172,6 +172,25 @@ class ForBlock(AST):
     def __repr__(self):
         return self.__str__()
 
+class WhileBlock(AST):
+    def __init__(self, left, op, right, body):
+        self.left = left
+        self.op = op
+        self.right = right
+        self.body = body
+    
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'WhileBlock:\n'
+        result += '  ' * (indent + 1) + "Condition:\n"
+        result += self.left.__str__(indent * 2 + 1) + '\n'
+        result += '  ' * (indent * 2 + 1) + f"Comparison: '{self.op}'\n"
+        result += self.right.__str__(indent * 2 + 1) + '\n'
+        result += self.body.__str__(indent + 1)
+        return result
+    
+    def __repr__(self):
+        return self.__str__()
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -323,6 +342,38 @@ class Parser:
                         else:
                             self.advance()
                 return ForBlock(count, Statement(body))
+            elif left.value == 'until':
+                left = self.term()
+                op = self.current_token.value
+                self.advance()
+                right = self.term()
+                if self.current_token and self.current_token.type == 'NEWLINE':
+                    self.advance()
+                else:
+                    self.error()
+
+                if self.current_token and self.current_token.type == 'INDENT':
+                    indent_level = self.current_token.value
+                    self.advance()
+                else:
+                    self.error()
+
+                body = []
+                while self.current_token:
+                    if self.current_token.type == 'NEWLINE':
+                        self.advance()
+                        if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value <= indent_level:
+                            self.advance()
+                        else:
+                            break
+                    else:
+                        line = self.expr()
+                        if line:
+                            body.append(line)
+                        else:
+                            self.advance()
+                return WhileBlock(left, op, right, Statement(body))
+                
         elif self.current_token:
             if self.current_token.type == 'OPERATOR':
                 op = self.current_token.value
@@ -383,7 +434,7 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        'repeat 5 times\n    output 2\n    output 8',
+        'repeat until x equals 10\n    output "Hello, World!"',
     ]
     
     for text in test_inputs:

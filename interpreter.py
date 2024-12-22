@@ -60,6 +60,27 @@ class Interpreter:
         count = self.visit(node.count)
         for _ in range(int(count)):
             self.visit(node.body)
+
+    def visit_WhileBlock(self, node):
+        left = self.visit(node.left)
+        op = self.visit(node.op)
+        right = self.visit(node.right)
+        while True:
+            if op == '==':
+                if left == right:
+                    break
+            elif op == '!=':
+                if left != right:
+                    break
+            elif op == '>':
+                if left > right:
+                    break
+            elif op == '<':
+                if left < right:
+                    break
+            self.visit(node.body)
+            left = self.visit(node.left)
+            right = self.visit(node.right)
             
     def visit_Number(self, node):
         return node.value
