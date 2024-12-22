@@ -78,6 +78,12 @@ class Interpreter:
             elif op == '<':
                 if left < right:
                     break
+            elif op == '>=':
+                if left >= right:
+                    break
+            elif op == '<=':
+                if left <= right:
+                    break
             self.visit(node.body)
             left = self.visit(node.left)
             right = self.visit(node.right)
