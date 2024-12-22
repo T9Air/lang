@@ -202,7 +202,7 @@ class Parser:
         while self.current_token:
             if self.current_token.type == 'NEWLINE':
                 self.advance()
-                if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value < indent_level:
+                if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value <= indent_level:
                     self.advance()
                 else:
                     break
@@ -230,7 +230,7 @@ class Parser:
             while self.current_token:
                 if self.current_token.type == 'NEWLINE':
                     self.advance()
-                    if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value < else_indent_level:
+                    if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value <= else_indent_level:
                         self.advance()
                     else:
                         break
