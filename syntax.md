@@ -1,4 +1,3 @@
-
 # enlang Syntax Guide
 
 ## Variable Assignment
@@ -65,4 +64,20 @@ output "Hello, World!"
 
 ```enlang
 <variable_name> is now input
+```
+
+## Loops
+
+Use `repeat x times` to create a loop that runs `x` times:
+
+```enlang
+repeat <number> times
+    <statements>
+```
+
+Example:
+
+```enlang
+repeat 5 times
+    output "Hello"
 ```
