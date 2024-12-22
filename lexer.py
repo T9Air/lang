@@ -138,6 +138,32 @@ class Lexer:
                         self.pos = start_pos
                         self.current_char = self.text[self.pos]
                         raise Exception(f'Syntax Error: Expected "now" after "is" at line {self.line}, column {self.column}')
+                elif identifier == 'repeat':
+                    self.skip_whitespace()
+                    start_pos = self.pos
+                    if self.current_char.isdigit() or self.current_char.isalpha():
+                        tokens.append(Token('KEYWORD', 'repeat'))
+                        if self.current_char.isdigit():
+                            number = self.get_number()
+                            tokens.append(Token('NUMBER', number))
+                        elif self.current_char.isalpha():
+                            identifier = self.get_identifier()
+                            if identifier != 'until':
+                                tokens.append(Token('IDENTIFIER', identifier))
+                            else:
+                                self.pos = start_pos
+                                self.current_char = self.text[self.pos]
+                                raise Exception(f'Syntax Error: Expected number after "repeat" at line {self.line}, column {self.column}')
+                        self.skip_whitespace()
+                        identifier = self.get_identifier()
+                        if identifier != 'times':
+                            self.pos = start_pos
+                            self.current_char = self.text[self.pos]
+                            raise Exception(f'Syntax Error: Expected "times" after number at line {self.line}, column {self.column}')
+                    else:
+                        self.pos = start_pos
+                        self.current_char = self.text[self.pos]
+                        raise Exception(f'Syntax Error: Expected number after "repeat" at line {self.line}, column {self.column}')
                 elif identifier == 'if':
                     tokens.append(Token('KEYWORD', 'if'))
                     self.skip_whitespace()

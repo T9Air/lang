@@ -57,6 +57,12 @@ class Interpreter:
                 return self.visit(node.else_body)
             return None
         
+
+    def visit_ForBlock(self, node):
+        count = self.visit(node.count)
+        for _ in range(int(count)):
+            self.visit(node.body)
+            
     def visit_Number(self, node):
         return node.value
     

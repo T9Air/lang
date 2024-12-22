@@ -158,6 +158,20 @@ class IfBlock(AST):
     def __repr__(self):
         return self.__str__()
 
+class ForBlock(AST):
+    def __init__(self, count, body):
+        self.count = count
+        self.body = body
+    
+    def __str__(self, indent=0):
+        result = '  ' * indent + 'ForBlock:\n'
+        result += self.count.__str__(indent + 1) + '\n'
+        result += self.body.__str__(indent + 1)
+        return result
+    
+    def __repr__(self):
+        return self.__str__()
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -281,7 +295,34 @@ class Parser:
                     self.error()
             elif left.value == 'if':
                 left = self.parse_if()
-                
+            elif left.value == 'repeat':
+                count = self.term()
+                if self.current_token and self.current_token.type == 'NEWLINE':
+                    self.advance()
+                else:
+                    self.error()
+
+                if self.current_token and self.current_token.type == 'INDENT':
+                    indent_level = self.current_token.value
+                    self.advance()
+                else:
+                    self.error()
+
+                body = []
+                while self.current_token:
+                    if self.current_token.type == 'NEWLINE':
+                        self.advance()
+                        if self.current_token and self.current_token.type == 'INDENT' and self.current_token.value <= indent_level:
+                            self.advance()
+                        else:
+                            break
+                    else:
+                        line = self.expr()
+                        if line:
+                            body.append(line)
+                        else:
+                            self.advance()
+                return ForBlock(count, Statement(body))
         elif self.current_token:
             if self.current_token.type == 'OPERATOR':
                 op = self.current_token.value
@@ -342,7 +383,7 @@ class Parser:
 
 if __name__ == '__main__':
     test_inputs = [
-        'x is now 5\nif x equals 5\n    output "x is 5"\notherwise\n    output "x is not 5"',
+        'repeat 5 times\n    output 2\n    output 8',
     ]
     
     for text in test_inputs:
